@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. 1.0.0 — without leading v)'
+        description: 'Release version (e.g. 2026.11.02 — without leading v)'
         required: true
   push:
     tags:

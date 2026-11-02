@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0
+## 2026.11.02
 
 - Move the collection's OpenBabel Conversion Tool into its own packaged plugin.
 - Keep import/export, molecule selection, cancellation, bounds and format caching.

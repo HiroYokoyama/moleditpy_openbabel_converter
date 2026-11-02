@@ -41,7 +41,7 @@ OBABEL_AVAILABLE = None
 pybel = SimpleNamespace(informats={}, outformats={})
 
 PLUGIN_NAME = "OpenBabel Conversion Tool"
-PLUGIN_VERSION = "1.0.0"
+PLUGIN_VERSION = "2026.11.02"
 PLUGIN_LICENSE = "GPL-2.0-or-later"
 PLUGIN_SUPPORTED_MOLEDITPY_VERSION = ">=5.0.0, <6.0.0"
 PLUGIN_AUTHOR = "HiroYokoyama"

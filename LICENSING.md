@@ -8,7 +8,7 @@ identified in the source history and notices.
 The first-party plugin runtime and its tests in this repository are offered under
 the GNU General Public License, **version 2 or (at your option) any later version**
 (`GPL-2.0-or-later`). See [LICENSE](LICENSE). This grant applies from the external
-package's 1.0.0 release. Historical collection releases retain their original grants.
+package's 2026.11.02 release. Historical collection releases retain their original grants.
 The source originates from the owner's `moleditpy-plugins` Conversion Tool; the
 new grant covers the owner's rights and does not relicense upstream dependencies.
 

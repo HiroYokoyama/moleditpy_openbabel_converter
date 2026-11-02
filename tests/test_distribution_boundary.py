@@ -30,7 +30,7 @@ def test_zip_contains_standalone_workers_and_notices(tmp_path):
     for name in config["include"]:
         shutil.copy2(ROOT / name, staged / name)
     config["archive"] = "converter.zip"
-    archive = module.package(staged, config, "1.0.0")
+    archive = module.package(staged, config, "2026.11.02")
     with ZipFile(archive) as zipped:
         names = set(zipped.namelist())
         for name in ["__init__.py", "_formats_worker.py", "_conversion_worker.py",
