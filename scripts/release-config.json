@@ -1,0 +1,18 @@
+{
+  "source": "openbabel_converter/__init__.py",
+  "title": "OpenBabel Conversion Tool",
+  "package": "openbabel_converter",
+  "archive": "openbabel_converter_{version}.zip",
+  "assets": [
+    "openbabel_converter_{version}.zip"
+  ],
+  "include": [
+    "README.md",
+    "LICENSE",
+    "LICENSING.md"
+  ],
+  "exclude": [
+    "*/__pycache__/*",
+    "*/.git/*"
+  ]
+}
