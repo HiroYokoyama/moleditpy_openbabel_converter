@@ -101,6 +101,42 @@ class TestMoleculeSelectionDialog:
 
 
 class TestIsolatedConversion:
+    def test_initialization_and_reload_never_create_progress_dialog(self, qapp, monkeypatch, tmp_path):
+        monkeypatch.setattr(_openbabel, '_openbabel_fingerprint', lambda: {'v': 1})
+        # Force discovery even when a cache cannot be written or reused.
+        monkeypatch.setattr(_openbabel, '_cached_formats', lambda fingerprint: None)
+        monkeypatch.setattr(_openbabel, '_store_formats', lambda *args: None)
+        monkeypatch.setattr(_openbabel, '_FORMAT_SCRIPT', """
+import json, sys
+with open(sys.argv[1], 'w', encoding='utf-8') as handle:
+    json.dump({'informats': {'pdb': 'PDB'}, 'outformats': {'xyz': 'XYZ'}}, handle)
+""")
+        progress = MagicMock(side_effect=AssertionError('Startup must not create a dialog'))
+        monkeypatch.setattr(_openbabel, 'QProgressDialog', progress)
+        for _ in range(2):
+            monkeypatch.setattr(_openbabel, 'OBABEL_AVAILABLE', None)
+            context = MagicMock()
+            context.get_main_window.return_value = None
+            _openbabel.initialize(context)
+            assert _openbabel.OBABEL_AVAILABLE is True
+            context.register_file_opener.assert_called_once()
+            context.add_export_action.assert_called_once()
+        progress.assert_not_called()
+
+    def test_silent_worker_timeout_keeps_gui_responsive(self, qapp, monkeypatch):
+        from PySide6.QtCore import QTimer
+        monkeypatch.setattr(_openbabel, 'CONVERSION_TIMEOUT_MS', 250)
+        ticks = []
+        timer = QTimer()
+        timer.timeout.connect(lambda: ticks.append(1))
+        timer.start(10)
+        try:
+            with pytest.raises(ValueError, match='timed out'):
+                _openbabel._run_conversion('import time; time.sleep(60)', [], None, show_progress=False)
+        finally:
+            timer.stop()
+        assert len(ticks) >= 2
+
     def test_format_discovery_worker_returns_plain_metadata(self, qapp, monkeypatch, tmp_path):
         monkeypatch.setattr(_openbabel, 'OBABEL_AVAILABLE', None)
         # Exercise the worker whether or not openbabel is installed here, and

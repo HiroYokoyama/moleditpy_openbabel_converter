@@ -30,7 +30,15 @@ def test_zip_contains_standalone_workers_and_notices(tmp_path):
     for name in config["include"]:
         shutil.copy2(ROOT / name, staged / name)
     config["archive"] = "converter.zip"
-    archive = module.package(staged, config, "2026.11.02")
+    tree = ast.parse((ROOT / config["source"]).read_text(encoding="utf-8"))
+    version = next(
+        ast.literal_eval(node.value)
+        for node in tree.body
+        if isinstance(node, ast.Assign)
+        and any(isinstance(target, ast.Name) and target.id == "PLUGIN_VERSION"
+                for target in node.targets)
+    )
+    archive = module.package(staged, config, version)
     with ZipFile(archive) as zipped:
         names = set(zipped.namelist())
         for name in ["__init__.py", "_formats_worker.py", "_conversion_worker.py",

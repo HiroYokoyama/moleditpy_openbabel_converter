@@ -41,7 +41,7 @@ OBABEL_AVAILABLE = None
 pybel = SimpleNamespace(informats={}, outformats={})
 
 PLUGIN_NAME = "OpenBabel Conversion Tool"
-PLUGIN_VERSION = "2026.11.02"
+PLUGIN_VERSION = "2026.11.03"
 PLUGIN_LICENSE = "GPL-2.0-or-later"
 PLUGIN_SUPPORTED_MOLEDITPY_VERSION = ">=5.0.0, <6.0.0"
 PLUGIN_AUTHOR = "HiroYokoyama"
@@ -127,7 +127,7 @@ def _store_formats(fingerprint, formats):
 def _discover_formats(parent):
     with tempfile.TemporaryDirectory(prefix='moleditpy-obabel-') as directory:
         output = os.path.join(directory, 'formats.json')
-        _run_conversion(_FORMAT_SCRIPT, [output], parent)
+        _run_conversion(_FORMAT_SCRIPT, [output], parent, show_progress=False)
         with open(output, 'rb') as handle:
             raw = handle.read(1024 * 1024 + 1)
         if len(raw) > 1024 * 1024:
@@ -140,10 +140,8 @@ def _ensure_formats(parent=None):
     global OBABEL_AVAILABLE
     if OBABEL_AVAILABLE is not None:
         return OBABEL_AVAILABLE
-    # The discovery worker is a fresh interpreter importing openbabel: about
-    # 0.25 s and a progress dialog on every MoleditPy start. Its answer only
-    # changes with the interpreter or the openbabel install, so it is cached
-    # against those; failures are not cached and are retried next start.
+    # Cache discovery against the interpreter and Open Babel installation.
+    # Failures are not cached and are retried next start.
     fingerprint = _openbabel_fingerprint()
     if fingerprint is None:
         OBABEL_AVAILABLE = False
@@ -165,7 +163,7 @@ def _ensure_formats(parent=None):
 _CONVERSION_SCRIPT = Path(__file__).with_name("_conversion_worker.py").read_text(encoding="utf-8")
 
 
-def _run_conversion(script, arguments, parent):
+def _run_conversion(script, arguments, parent, *, show_progress=True):
     # A frozen executable interprets '-c' as application arguments and would
     # recursively launch the editor. Native workers need a Python installation.
     if getattr(sys, 'frozen', False):
@@ -176,9 +174,11 @@ def _run_conversion(script, arguments, parent):
         )
     process = QProcess(parent)
     loop = QEventLoop()
-    progress = QProgressDialog('Converting with OpenBabel...', 'Cancel', 0, 0, parent)
-    progress.setWindowModality(Qt.WindowModality.WindowModal)
-    progress.setMinimumDuration(0)
+    progress = None
+    if show_progress:
+        progress = QProgressDialog('Converting with OpenBabel...', 'Cancel', 0, 0, parent)
+        progress.setWindowModality(Qt.WindowModality.WindowModal)
+        progress.setMinimumDuration(0)
     timer = QTimer()
     timer.setSingleShot(True)
     failure = []
@@ -198,12 +198,14 @@ def _run_conversion(script, arguments, parent):
     process.readyReadStandardOutput.connect(drain)
     process.finished.connect(loop.quit)
     process.errorOccurred.connect(loop.quit)
-    progress.canceled.connect(lambda: stop('Conversion cancelled.'))
+    if progress is not None:
+        progress.canceled.connect(lambda: stop('Conversion cancelled.'))
     timer.timeout.connect(lambda: stop('Conversion timed out after 30 seconds.'))
     try:
         process.start(sys.executable, ['-c', script, *arguments])
         timer.start(CONVERSION_TIMEOUT_MS)
-        progress.show()
+        if progress is not None:
+            progress.show()
         loop.exec()
         drain()
         if failure:
@@ -215,8 +217,9 @@ def _run_conversion(script, arguments, parent):
         if process.state() != QProcess.ProcessState.NotRunning:
             process.kill()
             process.waitForFinished(1000)
-        progress.close()
-        progress.deleteLater()
+        if progress is not None:
+            progress.close()
+            progress.deleteLater()
         process.deleteLater()
 
 
