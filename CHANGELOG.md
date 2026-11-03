@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026.11.03
+
+- Discover supported formats without a progress dialog during startup or plugin reload.
+- Keep conversion progress, cancellation and worker timeouts.
+
 ## 2026.11.02
 
 - Move the collection's OpenBabel Conversion Tool into its own packaged plugin.

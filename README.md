@@ -65,8 +65,8 @@ repository or process alone does not establish legal independence.
 ```sh
 python -m pip install -e ".[engine,test]"
 python -m pytest -q
-python scripts/release_common.py verify --version 2026.11.02
-python scripts/release_common.py package --version 2026.11.02
+python scripts/release_common.py verify --version 2026.11.03
+python scripts/release_common.py package --version 2026.11.03
 ```
 
 Set `QT_QPA_PLATFORM=offscreen` and `PYTEST_QT_API=pyside6` for headless testing.

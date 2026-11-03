@@ -42,7 +42,8 @@ class TestNativeEngineIsolation:
         with mock_optional_imports():
             mod = _load_plugin(OBABEL_PATH)
 
-        def discover(script, args, parent):
+        def discover(script, args, parent, *, show_progress):
+            assert show_progress is False
             assert script == mod._FORMAT_SCRIPT
             Path(args[0]).write_text(json.dumps({
                 'informats': {'pdb': 'PDB'}, 'outformats': {'xyz': 'XYZ'},
@@ -92,7 +93,8 @@ class TestNativeEngineIsolation:
         with mock_optional_imports():
             mod = _load_plugin(OBABEL_PATH)
 
-        def discover(script, args, parent):
+        def discover(script, args, parent, *, show_progress):
+            assert show_progress is False
             Path(args[0]).write_text(json.dumps({
                 'informats': {'pdb': 'PDB'}, 'outformats': {'xyz': 'XYZ'},
             }), encoding='utf-8')
